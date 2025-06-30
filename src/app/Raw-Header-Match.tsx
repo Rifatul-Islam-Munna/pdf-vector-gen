@@ -875,10 +875,23 @@ const PayslipPDFViewer = () => {
 
 
 
+   const rawHex = '25 50 44 46 2D 31 2E 34 0D 0A 25 A2 A3 8F 93 0D 0A 33 20 30 20 6F 62 6A 0D 0A 3C 3C 2F 54 79 70 65 20 2F 58 4F 62 6A 65 63 74 20 2F 53 75 62 74 79 70 65 20 2F 49 6D 61 67 65 20 2F 57 69 64 74 68 20 33 36 20 2F 48 65 69 67 68 74 20 36 34 34 20 2F 43 6F 6C 6F 72 53 70 61 63 65 20 2F 44 65 76 69 63 65 52 47 42 20 2F 42 69 74 73 50 65 72 43 6F 6D 70 6F 6E 65 6E 74 20 38 20 2F 44 65 63';
 
-         const finalPdfBytes = new Uint8Array(headerBytes.length + strippedPdf.length);
-   finalPdfBytes.set(headerBytes, 0);
-finalPdfBytes.set(strippedPdf, headerBytes.length);
+// Convert hex string to Uint8Array
+function hexToBytes(hex) {
+  return new Uint8Array(
+    hex
+      .replace(/\s+/g, '') // remove spaces/newlines
+      .match(/.{1,2}/g)    // split every 2 chars
+      .map(byte => parseInt(byte, 16))
+  );
+}
+
+const rawHeaderBytes = hexToBytes(rawHex);
+
+         const finalPdfBytes = new Uint8Array(rawHeaderBytes.length + strippedPdf.length);
+   finalPdfBytes.set(rawHeaderBytes, 0);
+finalPdfBytes.set(strippedPdf, rawHeaderBytes.length);
 
 
 
