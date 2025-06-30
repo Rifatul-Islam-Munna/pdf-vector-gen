@@ -818,6 +818,7 @@ const PayslipPDFViewer = () => {
   const handleDownloadPDF = async () => {
     const { pdf } = await import("@react-pdf/renderer");
     const blob = await pdf(<PayslipDocument />).toBlob();
+    
     saveAs(blob, "PaySlips-Monthly-20250617.pdf");
   };
 

@@ -1,6 +1,6 @@
 
-import PayslipPDFViewer from "./ReactPdf";
-// import PayslipPDFViewer from "./payslip";
+/* import PayslipPDFViewer from "./ReactPdf"; */
+ import PayslipPDFViewer from "./payslip";
 
 import { Suspense } from "react";
 export default function Home() {

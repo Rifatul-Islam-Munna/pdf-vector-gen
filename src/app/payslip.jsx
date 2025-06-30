@@ -1,6 +1,6 @@
 "use client";
 import { Document, Page, Text, View, StyleSheet, Image, Font, pdf, PDFViewer } from "@react-pdf/renderer";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument ,PDFName } from "pdf-lib";
 import { saveAs } from "file-saver";
 import imageSrc from './image.png' // Adjust path if needed
 
@@ -835,9 +835,11 @@ const PayslipPDFViewer = () => {
       const response = await fetch('/api/process-image');
       if (!response.ok) throw new Error('Image fetch failed');
       const imageBuffer = await response.blob();
+    
+  
 
       // Generate PDF
-      const pdfBlob = await pdf(<PayslipDocument imageSrc={imageBuffer} />).toBlob();
+      const pdfBlob = await pdf(<PayslipDocument imageSrc={imageSrc} />).toBlob();
       const arrayBuffer = await pdfBlob.arrayBuffer();
 
       // Load PDF into pdf-lib
@@ -850,45 +852,36 @@ const PayslipPDFViewer = () => {
       pdfDoc.setKeywords(["payslip", "employee", "payroll"]);
       pdfDoc.setProducer("Developer Express Inc. DXperience (tm) v23.1.5");
       pdfDoc.setCreator("My React App");
-
+      pdfDoc.catalog.set(PDFName.of('Version'), PDFName.of('1.4'));
       // Set custom dates
       const customDate = new Date("2025-06-17T13:05:14Z");
       pdfDoc.setCreationDate(customDate);
       pdfDoc.setModificationDate(customDate);
 
-      // Add XMP metadata stream
-      const xmpMetadata = `
-        <?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
-        <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.6-c145">
-          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-            <rdf:Description rdf:about=""
-              xmlns:dc="http://purl.org/dc/elements/1.1/"
-              xmlns:pdf="http://ns.adobe.com/pdf/1.3/"
-              xmlns:xmp="http://ns.adobe.com/xap/1.0/">
-              <dc:title>Payslip Document</dc:title>
-              <dc:creator>Major Precinct Limited</dc:creator>
-              <dc:subject>Employee Payslip</dc:subject>
-              <dc:description>Employee Payslip</dc:description>
-              <pdf:Keywords>payslip, employee, payroll</pdf:Keywords>
-              <pdf:Producer>Developer Express Inc. DXperience (tm) v23.1.5</pdf:Producer>
-              <xmp:CreatorTool>My React App</xmp:CreatorTool>
-              <xmp:CreateDate>2025-06-17T13:05:14Z</xmp:CreateDate>
-              <xmp:ModifyDate>2025-06-17T13:05:14Z</xmp:ModifyDate>
-              <xmp:MetadataDate>2025-06-17T13:05:14Z</xmp:MetadataDate>
-            </rdf:Description>
-          </rdf:RDF>
-        </x:xmpmeta>
-        <?xpacket end="w"?>
-      `;
-      pdfDoc.setMetadata(xmpMetadata);
+    
+      
 
-      // Set PDF version to 1.4
-      pdfDoc.setVersion(1.4);
+ 
+    
 
       // Save modified PDF
       const modifiedPdfBytes = await pdfDoc.save();
-      const modifiedPdfBlob = new Blob([modifiedPdfBytes], { type: "application/pdf" });
-      saveAs(modifiedPdfBlob, "PaySlips-Monthly-20250617.pdf");
+      const strippedPdf = modifiedPdfBytes.slice(16);
+       const headerBytes = new Uint8Array([
+  0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x34, 0x0D, 0x0A, // %PDF-1.4\r\n
+  0x25, 0xA2, 0xA3, 0x8F, 0x93, 0x0D, 0x0A,                   // %âãÏÓ\r\n
+]);
+
+         const finalPdfBytes = new Uint8Array(headerBytes.length + strippedPdf.length);
+   finalPdfBytes.set(headerBytes, 0);
+finalPdfBytes.set(strippedPdf, headerBytes.length);
+
+
+
+      const modifiedPdfBlob = new Blob([finalPdfBytes], { type: "application/pdf" });
+       const fileToDownload = new File([modifiedPdfBlob], "PaySlips-Monthly-20250617.pdf", { type: "application/pdf" });
+
+      saveAs(fileToDownload )
     } catch (error) {
       console.error("PDF generation failed:", error);
     }
