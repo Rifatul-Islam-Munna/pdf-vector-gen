@@ -1,20 +1,26 @@
-// components/PayslipPDFViewer.jsx
 "use client";
+import { Document, Page, Text, View, StyleSheet, Image, Font, pdf, PDFViewer } from "@react-pdf/renderer";
+import { PDFDocument } from "pdf-lib";
+import { saveAs } from "file-saver";
+import imageSrc from './image.png' // Adjust path if needed
 
-import { Document, Page, Text, View, StyleSheet, PDFViewer, Image } from "@react-pdf/renderer";
-import { saveAs } from "file-saver"; // For downloading the PDF
-import k from "./image.png";
+// Register LiberationSans font with custom naming
+Font.register({
+  family: "LiberationSans",
+  fonts: [
+    { src: "/fonts/LiberationSans-Regular.ttf", fontName: "DEVEXP+LiberationSans" },
+    { src: "/fonts/LiberationSans-Bold.ttf", fontName: "DEVEXP+LiberationSans,Bold", fontWeight: "bold" },
+  ],
+});
 
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
     backgroundColor: "#FFFFFF",
     padding: 0,
-    fontFamily: "LiberationSans", // Use LiberationSans if available
+    fontFamily: "LiberationSans",
     fontSize: 8,
   },
-  // ... (Rest of the styles are identical to your original code)
-  // Top purple section
   topSection: {
     backgroundColor: "#fff",
     height: 280,
@@ -54,6 +60,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#000",
     marginBottom: 8,
+    fontWeight: "bold",
   },
   employeeAddress: {
     fontSize: 10,
@@ -220,6 +227,12 @@ const styles = StyleSheet.create({
     borderBottom: "none",
     marginTop: -1,
   },
+  totalSection: {
+    flexDirection: "row",
+    height: 30,
+    borderTop: "none",
+    marginTop: -1,
+  },
   grossPayColumn1: {
     flex: 2.5,
     flexDirection: "column",
@@ -277,12 +290,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 8,
     justifyContent: "flex-start",
-  },
-  totalSection: {
-    flexDirection: "row",
-    height: 30,
-    borderTop: "none",
-    marginTop: -1,
   },
   totalRowGross: {
     backgroundColor: "#FFFFFF",
@@ -540,34 +547,23 @@ const styles = StyleSheet.create({
   },
 });
 
-// Register LiberationSans font
-import { Font } from "@react-pdf/renderer";
-Font.register({
-  family: "LiberationSans",
-  fonts: [
-    { src: "/fonts/LiberationSans-Regular.ttf" },
-    { src: "/fonts/LiberationSans-Bold.ttf", fontWeight: "bold" },
-  ],
-});
-
-const PayslipDocument = () => (
+const PayslipDocument = ({ imageSrc }) => (
   <Document
-    title="PaySlips-Monthly-20250617"
-    author=""
+    // title="Payslip Document"
+    // author="Major Precinct Limited"
+    // subject="Employee Payslip"
+    // keywords="payslip, employee, payroll"
     creator="Developer Express Inc. DXperience (tm) v23.1.5"
     producer="Developer Express Inc. DXperience (tm) v23.1.5"
-    creationDate={new Date("2025-06-17T13:05:14Z")}
-    modificationDate={new Date("2025-06-17T13:05:14Z")}
   >
-    <Page size="A4" style={styles.page}>
-      {/* Top purple section */}
+    <Page size={[595, 842]} style={styles.page}>
       <View style={styles.topSection}>
         <View style={styles.leftSideText}>
-          <Image src={k.src} style={styles.privateText} />
+          <Image src={imageSrc.src} style={styles.privateText} />
         </View>
         <View style={styles.topMainContent}>
           <View style={styles.employeeInfo}>
-            <Text style={styles.employeeName}>Jhon Doe</Text>
+            <Text style={styles.employeeName}>DAVID WILKINSON</Text>
             <Text style={styles.employeeAddress}>15 Lupton Road</Text>
             <Text style={styles.employeeAddress}>Sheffield South Yorkshire S8 7ND</Text>
           </View>
@@ -586,7 +582,7 @@ const PayslipDocument = () => (
           </View>
           <View style={styles.headerBox2}>
             <Text style={styles.labelText}>Employee</Text>
-            <Text style={styles.headerText}>11308456 Jhon Doe</Text>
+            <Text style={styles.headerText}>11308456 DAVID WILKINSON</Text>
           </View>
           <View style={styles.headerBox3}>
             <Text style={styles.labelText}>Department</Text>
@@ -624,8 +620,8 @@ const PayslipDocument = () => (
               <Text style={styles.grossPayHeader}>GROSS PAY</Text>
             </View>
             <View style={styles.payTable}>
-              <View style={[styles.grossPayColumn1, { borderLeft: "2px solid #000" }]}>
-                <View style={styles.columnHeader}>
+              <View style={styles.grossPayColumn1}>
+                <View style={[styles.columnHeader, { borderLeft: "2px solid #000" }]}>
                   <Text style={styles.columnHeaderText}>Description</Text>
                 </View>
                 <View style={styles.columnContent}>
@@ -720,12 +716,28 @@ const PayslipDocument = () => (
             </View>
           </View>
         </View>
-        <View style={{ display: "flex", justifyContent: "flex-end", alignItems: "flex-end", width: "100%", paddingBottom: 5, paddingTop: 85 }}>
+        <View
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "flex-end",
+            width: "100%",
+            paddingBottom: 5,
+            paddingTop: 85,
+          }}
+        >
           <View style={styles.netPaySection}>
             <View style={{ justifyContent: "center", alignItems: "center", width: "50%" }}>
               <Text style={styles.netPayText}>NET PAY</Text>
             </View>
-            <View style={{ backgroundColor: "#fff", width: "50%", paddingVertical: 5, paddingHorizontal: 10 }}>
+            <View
+              style={{
+                backgroundColor: "#fff",
+                width: "50%",
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+              }}
+            >
               <Text style={{ color: "#000" }}>3646.84</Text>
             </View>
           </View>
@@ -779,7 +791,9 @@ const PayslipDocument = () => (
               </View>
             </View>
           </View>
-          <View style={[styles.employerContribSection, { borderBottom: "4px solid #000", borderLeft: "4px solid #000", borderRight: "4px solid #000" }]}>
+          <View
+            style={[styles.employerContribSection, { borderBottom: "4px solid #000", borderLeft: "4px solid #000", borderRight: "4px solid #000" }]}
+          >
             <Text style={styles.employerContribHeader}>EMPLOYER'S CONTRIBUTIONS</Text>
             <View style={styles.contribSubHeader}>
               <View style={styles.contribSubHeaderEmpty}></View>
@@ -815,28 +829,77 @@ const PayslipDocument = () => (
 );
 
 const PayslipPDFViewer = () => {
-  const handleDownloadPDF = async () => {
-    const { pdf } = await import("@react-pdf/renderer");
-    const blob = await pdf(<PayslipDocument />).toBlob();
-    saveAs(blob, "PaySlips-Monthly-20250617.pdf");
+  const generateAndDownloadPDF = async () => {
+    try {
+      // Fetch processed image from API
+      const response = await fetch('/api/process-image');
+      if (!response.ok) throw new Error('Image fetch failed');
+      const imageBuffer = await response.blob();
+
+      // Generate PDF
+      const pdfBlob = await pdf(<PayslipDocument imageSrc={imageBuffer} />).toBlob();
+      const arrayBuffer = await pdfBlob.arrayBuffer();
+
+      // Load PDF into pdf-lib
+      const pdfDoc = await PDFDocument.load(arrayBuffer);
+
+      // Set metadata
+      pdfDoc.setTitle("Payslip Document");
+      pdfDoc.setAuthor("Major Precinct Limited");
+      pdfDoc.setSubject("Employee Payslip");
+      pdfDoc.setKeywords(["payslip", "employee", "payroll"]);
+      pdfDoc.setProducer("Developer Express Inc. DXperience (tm) v23.1.5");
+      pdfDoc.setCreator("My React App");
+
+      // Set custom dates
+      const customDate = new Date("2025-06-17T13:05:14Z");
+      pdfDoc.setCreationDate(customDate);
+      pdfDoc.setModificationDate(customDate);
+
+      // Add XMP metadata stream
+      const xmpMetadata = `
+        <?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+        <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.6-c145">
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about=""
+              xmlns:dc="http://purl.org/dc/elements/1.1/"
+              xmlns:pdf="http://ns.adobe.com/pdf/1.3/"
+              xmlns:xmp="http://ns.adobe.com/xap/1.0/">
+              <dc:title>Payslip Document</dc:title>
+              <dc:creator>Major Precinct Limited</dc:creator>
+              <dc:subject>Employee Payslip</dc:subject>
+              <dc:description>Employee Payslip</dc:description>
+              <pdf:Keywords>payslip, employee, payroll</pdf:Keywords>
+              <pdf:Producer>Developer Express Inc. DXperience (tm) v23.1.5</pdf:Producer>
+              <xmp:CreatorTool>My React App</xmp:CreatorTool>
+              <xmp:CreateDate>2025-06-17T13:05:14Z</xmp:CreateDate>
+              <xmp:ModifyDate>2025-06-17T13:05:14Z</xmp:ModifyDate>
+              <xmp:MetadataDate>2025-06-17T13:05:14Z</xmp:MetadataDate>
+            </rdf:Description>
+          </rdf:RDF>
+        </x:xmpmeta>
+        <?xpacket end="w"?>
+      `;
+      pdfDoc.setMetadata(xmpMetadata);
+
+      // Set PDF version to 1.4
+      pdfDoc.setVersion(1.4);
+
+      // Save modified PDF
+      const modifiedPdfBytes = await pdfDoc.save();
+      const modifiedPdfBlob = new Blob([modifiedPdfBytes], { type: "application/pdf" });
+      saveAs(modifiedPdfBlob, "PaySlips-Monthly-20250617.pdf");
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+    }
   };
 
   return (
-    <div style={{ width: "100%", height: "100vh", textAlign: "center" }}>
+    <div style={{ width: "100%", height: "100vh" }}>
+      <button onClick={generateAndDownloadPDF}>Download PDF</button>
       <PDFViewer width="100%" height="100%">
-        <PayslipDocument />
+        <PayslipDocument imageSrc={imageSrc} />
       </PDFViewer>
-      <button
-        onClick={handleDownloadPDF}
-        style={{
-          padding: "10px 20px",
-          fontSize: "16px",
-          marginTop: "20px",
-          cursor: "pointer",
-        }}
-      >
-        Download Payslip PDF
-      </button>
     </div>
   );
 };
